@@ -1,0 +1,30 @@
+{
+  "name": "compress-code-responses",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Skill + tooling to minify AI code output and restore formatting locally with Prettier",
+  "type": "module",
+  "scripts": {
+    "postinstall": "node scripts/ensure-deps.js",
+    "ensure-deps": "node scripts/ensure-deps.js",
+    "format": "node scripts/format.js",
+    "format:check": "node scripts/format.js --check",
+    "install-skill": "node scripts/install-skill.js",
+    "test": "node --test tests/**/*.test.js",
+    "test:token-comparison": "node tests/token-comparison.js"
+  },
+  "bin": {
+    "ccr-format": "scripts/format.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@prettier/plugin-php": "^0.22.4",
+    "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.11"
+  },
+  "devDependencies": {
+    "tiktoken": "^1.0.21"
+  }
+}

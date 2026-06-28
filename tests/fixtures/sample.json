@@ -1,0 +1,12 @@
+{
+  "name": "compress-code-responses",
+  "version": "1.0.0",
+  "scripts": {
+    "format": "node scripts/format.js",
+    "test": "node --test tests/**/*.test.js"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": false
+  }
+}
