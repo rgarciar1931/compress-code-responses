@@ -14,3 +14,18 @@ test("equivalentContent ignores blank-line differences in code", () => {
   assert.equal(equivalentContent(a, b, "sample.js"), true);
   assert.equal(normalizeCodeLines(a), normalizeCodeLines(b));
 });
+
+test("equivalentContent treats formatter wrapping differences as equal", () => {
+  const a = `const payload = {
+  metadata: {
+    source: "checkout",
+    requestedAt: new Date().toISOString(),
+  },
+};
+`;
+  const b = `const payload = {
+  metadata: { source: "checkout", requestedAt: new Date().toISOString() },
+};
+`;
+  assert.equal(equivalentContent(a, b, "sample.js"), true);
+});

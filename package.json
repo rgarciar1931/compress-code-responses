@@ -10,7 +10,7 @@
     "format": "node scripts/format.js",
     "format:check": "node scripts/format.js --check",
     "install-skill": "node scripts/install-skill.js",
-    "test": "node --test tests/**/*.test.js",
+    "test": "node --test tests/minify.test.js tests/equivalent.test.js",
     "test:token-comparison": "node tests/token-comparison.js"
   },
   "bin": {

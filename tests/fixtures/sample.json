@@ -1,12 +1,42 @@
 {
   "name": "compress-code-responses",
   "version": "1.0.0",
+  "description": "Skill and tooling to minify AI code output and restore readable formatting locally with Prettier",
   "scripts": {
+    "postinstall": "node scripts/ensure-deps.js",
+    "ensure-deps": "node scripts/ensure-deps.js",
     "format": "node scripts/format.js",
-    "test": "node --test tests/**/*.test.js"
+    "format:check": "node scripts/format.js --check",
+    "install-skill": "node scripts/install-skill.js",
+    "test": "node --test tests",
+    "test:token-comparison": "node tests/token-comparison.js"
   },
   "prettier": {
     "printWidth": 100,
-    "singleQuote": false
+    "singleQuote": false,
+    "trailingComma": "es5",
+    "overrides": [
+      {
+        "files": ["*.php", "*.phtml"],
+        "options": {
+          "parser": "php",
+          "phpVersion": "8.2"
+        }
+      },
+      {
+        "files": ["*.json", "*.jsonc"],
+        "options": {
+          "parser": "json"
+        }
+      }
+    ]
+  },
+  "tooling": {
+    "targets": ["cursor", "claude", "opencode", "github-copilot", "phpstorm"],
+    "formatting": {
+      "localRestore": true,
+      "preserveIdentifiers": true,
+      "preserveStrings": true
+    }
   }
 }
