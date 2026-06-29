@@ -24,26 +24,14 @@ You pay fewer completion tokens; your repo still gets normally formatted code.
 
 ## Quick start
 
+Install the default skill:
+
 ```bash
 git clone https://github.com/rgarciar1931/compress-code-responses.git
 cd compress-code-responses
 npm install
 npm run install-skill
 npm run ensure-deps
-```
-
-### Install from specific version tags
-
-```bash
-# Stable release (master)
-git clone https://github.com/rgarciar1931/compress-code-responses.git
-cd compress-code-responses
-git checkout v1.0.0
-
-# Adobe Commerce release
-git clone https://github.com/rgarciar1931/compress-code-responses.git
-cd compress-code-responses
-git checkout v1.0.0-adobe
 ```
 
 On Windows PowerShell, if script execution policy blocks `npm`, use `npm.cmd`:
@@ -54,34 +42,33 @@ npm.cmd run install-skill
 npm.cmd run ensure-deps
 ```
 
-### Adobe Commerce / Magento 2 users
-
-For Adobe Commerce-specific Prettier config (di.xml, module.xml, GraphQL schemas, etc.), install from the `adobe-commerce` branch or tag:
+Use a specific release when needed:
 
 ```bash
-git clone https://github.com/rgarciar1931/compress-code-responses.git
-cd compress-code-responses
+# Stable release
+git checkout v1.0.0
+
+# Adobe Commerce / Magento 2 release
+git checkout v1.0.0-adobe
+```
+
+Adobe Commerce users can instead install from the `adobe-commerce` branch for
+Magento-specific formatting support:
+
+```bash
 git checkout adobe-commerce
 npm install
 npm run install-skill
 ```
 
-Option A: copy or submodule this repo into your project and run
-`npm run install-skill` from its root.
-
-Option B: install globally for all repos:
-
-```bash
-npm run install-skill
-```
-
-This writes user-level copies under paths such as `~/.cursor/skills/`,
-`~/.claude/skills/`, `~/.agents/skills/`, `~/.config/opencode/skills/`, and
+`npm run install-skill` writes user-level copies under paths such as
+`~/.cursor/skills/`, `~/.claude/skills/`, `~/.agents/skills/`,
+`~/.config/opencode/skills/`, and
 `~/.copilot/copilot-instructions.d/`.
 
-Option C: vendor only the skill by copying `skills/compress-code-responses/` to
-your project's `.cursor/skills/`, `.claude/skills/`, `.agents/skills/`, or
-`.opencode/skills/` directory.
+To vendor only the skill in one project, copy
+`skills/compress-code-responses/` to that project's `.cursor/skills/`,
+`.claude/skills/`, `.agents/skills/`, or `.opencode/skills/` directory.
 
 ## Formatting after AI edits
 
@@ -124,7 +111,7 @@ Per sample:
 Run it yourself:
 
 ```bash
-npm install
+npm test
 npm run test:token-comparison
 ```
 
@@ -179,8 +166,9 @@ npm test
 npm run test:token-comparison
 ```
 
-The `test` script uses explicit test file paths so it does not depend on shell
-glob behavior across Windows, macOS, and Linux.
+`npm test` runs the unit tests with explicit file paths for consistent behavior
+on Windows, macOS, and Linux. `npm run test:token-comparison` regenerates the
+benchmark artifacts described above.
 
 ## Project layout
 
