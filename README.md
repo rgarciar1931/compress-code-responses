@@ -59,26 +59,39 @@ You pay fewer completion tokens; your repo still gets normally formatted code.
 
 ## Quick start
 
-Choose the branch that matches your use case:
+Choose the branch or tag that matches your use case:
 
 ```bash
-# For generic projects (JS, PHP, XML, GraphQL, etc.)
+# Latest stable (master)
 git clone https://github.com/rgarciar1931/compress-code-responses.git
 cd compress-code-responses
-git checkout master
 npm install
 npm run install-skill
 npm run ensure-deps
 ```
 
 ```bash
-# For Adobe Commerce / Magento 2 projects
+# Adobe Commerce / Magento 2 branch
 git clone https://github.com/rgarciar1931/compress-code-responses.git
 cd compress-code-responses
 git checkout adobe-commerce
 npm install
 npm run install-skill
 npm run ensure-deps
+```
+
+### Install from specific version tags
+
+```bash
+# Generic stable release
+git clone https://github.com/rgarciar1931/compress-code-responses.git
+cd compress-code-responses
+git checkout v1.0.0
+
+# Adobe Commerce release
+git clone https://github.com/rgarciar1931/compress-code-responses.git
+cd compress-code-responses
+git checkout v1.0.0-adobe
 ```
 
 On Windows PowerShell, if script execution policy blocks `npm`, use `npm.cmd`:
