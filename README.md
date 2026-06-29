@@ -40,7 +40,17 @@ npm.cmd run install-skill
 npm.cmd run ensure-deps
 ```
 
-## Use in your own project
+### Adobe Commerce / Magento 2 users
+
+For Adobe Commerce-specific Prettier config (di.xml, module.xml, GraphQL schemas, etc.), install from the `adobe-commerce` branch:
+
+```bash
+git clone https://github.com/rgarciar1931/compress-code-responses.git
+cd compress-code-responses
+git checkout adobe-commerce
+npm install
+npm run install-skill
+```
 
 Option A: copy or submodule this repo into your project and run
 `npm run install-skill` from its root.
