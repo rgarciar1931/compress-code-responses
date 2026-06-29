@@ -1,0 +1,185 @@
+<?xml version="1.0" ?>
+<!--
+/**
+ * Copyright © YourCompany. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="urn:commerce:framework:ObjectManager/etc/config.xsd"
+>
+    <!--
+        Dependency injection configuration for the SampleModule module.
+        
+        This file defines:
+        - Argument injection for service constructors (order data, retry logic, logging)
+        - Plugin definitions around order processing methods
+        - Preference overrides for core commerce classes
+        - Virtual type definitions for specific service configurations
+        
+        @see \Commerce\Framework\ObjectManager\ConfigInterface
+    -->
+
+    <!-- ============================================================ -->
+    <!-- Argument Injection                                             -->
+    <!-- ============================================================ -->
+
+    <type name="VendorName\SampleModule\Service\RetryPendingSplitOrders">
+        <arguments>
+            <argument name="orderRepository" xsi:type="object">
+                Commerce\Sales\Api\OrderRepositoryInterface
+            </argument>
+            <argument name="logger" xsi:type="object">
+                Psr\Log\LoggerInterface
+            </argument>
+            <argument name="splitFactory" xsi:type="object">
+                VendorName\SampleModule\Model\Order\SplitFactory
+            </argument>
+            <argument name="config" xsi:type="object">
+                Commerce\Framework\App\ConfigScopeConfigInterface
+            </argument>
+            <argument name="retryDelay" xsi:type="object">
+                VendorName\SampleModule\Model\Config\RetryDelay
+            </argument>
+            <argument name="maxAttempts" xsi:type="object">
+                VendorName\SampleModule\Model\Config\MaxAttempts
+            </argument>
+            <argument name="lockFactory" xsi:type="object">
+                VendorName\SampleModule\Model\Lock\LockFactory
+            </argument>
+            <argument name="reentryCounter" xsi:type="object">
+                VendorName\SampleModule\Model\ReentryCounter
+            </argument>
+            <argument name="emailSender" xsi:type="object">
+                Commerce\Framework\Email\TemplateSenderInterface
+            </argument>
+            <argument name="transportBuilder" xsi:type="object">
+                Commerce\Framework\Mail\Template\TransportBuilder
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="VendorName\SampleModule\Service\OrderSplitService">
+        <arguments>
+            <argument name="orderManagementInterface" xsi:type="object">
+                Commerce\Sales\Api\OrderManagementInterface
+            </argument>
+            <argument name="orderRepository" xsi:type="object">
+                Commerce\Sales\Api\OrderRepositoryInterface
+            </argument>
+            <argument name="logger" xsi:type="object">
+                VendorName\SampleModule\Logger\Logger
+            </argument>
+            <argument name="orderExtensionFactory" xsi:type="object">
+                Commerce\Sales\Api\Data\OrderExtensionFactory
+            </argument>
+            <argument name="extensionAttributesFactory" xsi:type="object">
+                VendorName\SampleModule\Model\Data\OrderExtensionAttributesFactory
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- ============================================================ -->
+    <!-- Plugins Around Core Methods                                    -->
+    <!-- ============================================================ -->
+
+    <type name="Commerce\Sales\Model\OrderFactory">
+        <plugin
+      name="sample_order_split_plugin"
+      type="VendorName\SampleModule\Plugin\OrderFactoryPlugin"
+      sortOrder="10"
+      disabled="false"
+    />
+    </type>
+
+    <type name="Commerce\Sales\Model\OrderRepository">
+        <plugin
+      name="sample_order_split_repository_plugin"
+      type="VendorName\SampleModule\Plugin\OrderRepositoryPlugin"
+      sortOrder="20"
+      disabled="false"
+    />
+    </type>
+
+    <type name="Commerce\Sales\Model\Service\OrderService">
+        <plugin
+      name="sample_order_split_order_service_plugin"
+      type="VendorName\SampleModule\Plugin\OrderServicePlugin"
+      sortOrder="30"
+      disabled="false"
+    />
+    </type>
+
+    <!-- ============================================================ -->
+    <!-- Preference Overrides for Core Classes                          -->
+    <!-- ============================================================ -->
+
+    <!--
+        Preference override examples:
+        
+        <preference for="Some\Core\Class" type="Vendor\Module\Model\Core" />
+        
+        Use with caution - this affects ALL instances of the core class across commerce.
+        Preferred approach is to use plugins/interceptors instead.
+    -->
+
+    <!-- ============================================================ -->
+    <!-- Virtual Type Definitions                                       -->
+    <!-- ============================================================ -->
+
+    <virtualType name="OrderSplitLogger" type="VendorName\SampleModule\Logger\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">OrderSplit</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">
+                    VendorName\SampleModule\Logger\Handler\SystemHandler
+                </item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="OrderSplitRetryLogger" type="OrderSplitLogger">
+        <arguments>
+            <argument name="name" xsi:type="string">OrderSplitRetry</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="OrderSplitQueue" type="Commerce\Framework\MessageQueue\PublisherPool">
+        <arguments>
+            <argument name="publishers" xsi:type="array">
+                <item name="order_split_retry" xsi:type="object">
+                    Commerce\Framework\MessageQueue\PublisherInterface
+                </item>
+            </arguments>
+        </arguments>
+    </virtualType>
+
+    <virtualType
+    name="OrderSplitRetryTopicConfig"
+    type="Commerce\Framework\MessageQueue\Config\Processor"
+  >
+        <arguments>
+            <argument name="topics" xsi:type="array">
+                <item name="sample.order.split.retry" xsi:type="array">
+                    <item name="consumer" xsi:type="string">order_split_retry_consumer</item>
+                    <item name="handler" xsi:type="string">
+                        VendorName\SampleModule\Consumer\RetrySplitOrders::execute
+                    </item>
+                </item>
+            </arguments>
+        </arguments>
+    </virtualType>
+
+    <!-- ============================================================ -->
+    <!-- Event Observers                                                -->
+    <!-- ============================================================ -->
+
+    <type name="Commerce\Framework\Event\Observer">
+        <plugin
+      name="sample_inventory_save_observer"
+      type="VendorName\SampleModule\Observer\InventorySaveObserver"
+      sortOrder="5"
+    />
+    </type>
+</config>

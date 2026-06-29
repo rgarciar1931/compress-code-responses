@@ -41,6 +41,9 @@ const samples = [
   { name: "javascript", file: "sample.js" },
   { name: "php", file: "sample.php" },
   { name: "json", file: "sample.json" },
+  { name: "adobe-php-service", file: "sample-adobe-service.php" },
+  { name: "adobe-di-xml", file: "sample-adobe-di.xml" },
+  { name: "adobe-graphql-schema", file: "sample-adobe-schema.graphqls" },
 ];
 
 function countTokens(encoding, text) {

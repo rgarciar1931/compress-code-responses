@@ -1,0 +1,280 @@
+#
+# Copyright © YourCompany. All rights reserved.
+# See COPYING.txt for license details.
+#
+
+"""
+Sample GraphQl types for Generic Commerce platform.
+
+This schema defines the GraphQL mutations and types used for:
+- Cache warmup requests from CDN providers
+- Health check endpoints for external services
+- Manual cache invalidation triggers
+
+@see \GenericCommerce\GraphQl\Type\WarmupResult
+@see \GenericCommerce\GraphQl\Type\WarmupRequest
+"""
+type Query {
+  """
+  Get the current warmup status of the store.
+
+  @return WarmupStatus The current warmup cycle status.
+  """
+  warmupStatus: WarmupStatus
+    @resolver(class: "GenericCommerce\\GraphQl\\Resolver\\WarmupStatusResolver")
+
+  """
+  List all pending warmup URLs in the queue.
+
+  @param int $first Number of records to return.
+  @param string $after Cursor for pagination.
+  @return WarmupPageInfo Paginated list of pending warmup requests.
+  """
+  pendingWarmups(first: Int = 10, after: String = ""): WarmupPageInfo
+    @resolver(class: "GenericCommerce\\GraphQl\\Resolver\\PendingWarmupsResolver")
+}
+
+type Mutation {
+  """
+  Submit a bulk warmup request to the cache warming service.
+
+  This mutation accepts a list of URLs to warm and returns a request ID
+  that can be used to track the warmup progress.
+
+  @param WarmupRequestInput The warmup request containing URLs and metadata.
+  @return WarmupResponse Response containing the request ID and status.
+  """
+  warmupCache(warmupRequest: WarmupRequestInput!): WarmupResponse!
+    @resolver(class: "GenericCommerce\\GraphQl\\Resolver\\WarmupCacheResolver")
+
+  """
+  Invalidate specific cache tags.
+
+  @param array<string> $tags List of cache tags to invalidate.
+  @return Boolean true if all tags were invalidated.
+  """
+  invalidateCacheTags(tags: [String!]!): Boolean!
+    @resolver(class: "GenericCommerce\\GraphQl\\Resolver\\InvalidateCacheTagsResolver")
+}
+
+"""
+Input type for warmup cache requests.
+
+Example:
+{
+    "urls": ["https://example.com/product/1", "https://example.com/category/shoes"],
+    "priority": 1,
+    "trigger": "manual",
+    "ttl": 3600
+}
+"""
+input WarmupRequestInput {
+  """
+  List of URLs to warm up.
+  At least one URL must be provided.
+
+  @var list<string>
+  """
+  urls: [String!]!
+
+  """
+  Priority level of the warmup request.
+  Accepts values 0-10 (higher = more urgent).
+
+  @var int
+  @default 1
+  """
+  priority: Int = 1
+
+  """
+  Trigger type for the warmup request.
+  Options: automatic, manual, cdn_check.
+
+  @var string
+  """
+  trigger: String = "automatic"
+
+  """
+  Time-to-live for the cached content in seconds.
+  Default: 3600 (1 hour).
+
+  @var int
+  @default 3600
+  """
+  ttl: Int = 3600
+}
+
+"""
+Response type for warmup cache mutation.
+
+Contains the results of the requested warmup operation,
+including success/failure counts and error messages.
+"""
+type WarmupResponse {
+  """
+  Unique identifier for this warmup request.
+
+  @var string
+  """
+  requestId: String!
+
+  """
+  Total number of URLs processed.
+
+  @var int
+  """
+  processed: Int!
+
+  """
+  Number of URLs successfully warmed.
+
+  @var int
+  """
+  successful: Int!
+
+  """
+  Number of URLs that failed during warming.
+
+  @var int
+  """
+  failed: Int!
+
+  """
+  Number of URLs skipped due to validation.
+
+  @var int
+  """
+  skipped: Int!
+
+  """
+  List of error messages for failed URLs.
+
+  @var list<string>
+  """
+  errors: [String!]
+}
+
+"""
+Status type for warmup cycles.
+
+Tracks the current state of the warmup processor,
+including active status and queue counts.
+"""
+type WarmupStatus {
+  """
+  Whether a warmup cycle is currently in progress.
+
+  @var boolean
+  """
+  isActive: Boolean!
+
+  """
+  Number of URLs currently in the processing queue.
+
+  @var int
+  """
+  queueSize: Int!
+
+  """
+  Number of URLs currently being processed.
+
+  @var int
+  """
+  processingCount: Int!
+
+  """
+  Last successful warmup cycle timestamp.
+
+  @var String
+  """
+  lastSuccessfulAt: String
+
+  """
+  Last failed warmup cycle timestamp.
+
+  @var String
+  """
+  lastFailedAt: String
+}
+
+"""
+Paginated result set for pending warmup requests.
+
+Used for GraphQL cursor-based pagination of the pending queue.
+"""
+type WarmupPageInfo {
+  """
+  Connection page info with pagination metadata.
+
+  @var PageInfo
+  """
+  pageInfo: PageInfo!
+
+  """
+  List of pending warmup items.
+
+  @var list<WarmupItem>
+  """
+  items: [WarmupItem!]!
+}
+
+"""
+Individual warmup item in the pending queue.
+
+Represents a single URL pending warmup processing.
+"""
+type WarmupItem {
+  """
+  Unique identifier for the queue item.
+
+  @var string
+  """
+  id: ID!
+
+  """
+  URL to be warmed.
+
+  @var string
+  """
+  url: String!
+
+  """
+  Priority level assigned to this warmup.
+
+  @var int
+  """
+  priority: Int!
+
+  """
+  Date and time the item was queued.
+
+  @var string
+  """
+  queuedAt: String!
+
+  """
+  Number of retry attempts remaining.
+
+  @var int
+  """
+  retriesLeft: Int!
+
+  """
+  The trigger type that originally queued this URL.
+
+  @var string
+  """
+  trigger: String
+}
+
+"""
+Pagination metadata for cursor-based navigation.
+
+Standard page info structure per GraphQL spec.
+"""
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
