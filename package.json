@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@prettier/plugin-php": "^0.22.4",
+    "@prettier/plugin-xml": "^3.4.2",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11"
   },

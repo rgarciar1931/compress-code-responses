@@ -1,6 +1,6 @@
 /** @type {import("prettier").Config} */
 export default {
-  plugins: ["@prettier/plugin-php", "prettier-plugin-tailwindcss"],
+  plugins: ["@prettier/plugin-php", "prettier-plugin-tailwindcss", "@prettier/plugin-xml"],
   printWidth: 100,
   tabWidth: 2,
   useTabs: false,
@@ -13,13 +13,10 @@ export default {
   overrides: [
     {
       files: ["*.php", "*.phtml"],
-      options: {
-        parser: "php",
-        phpVersion: "8.2",
-      },
+      options: { parser: "php" },
     },
     {
-      files: ["*.json", "*.jsonc"],
+      files: ["*.json", "*.jsonc", "composer.json"],
       options: { parser: "json" },
     },
     {
@@ -37,6 +34,10 @@ export default {
     {
       files: ["*.md", "*.mdx"],
       options: { parser: "markdown", proseWrap: "preserve" },
+    },
+    {
+      files: ["*.graphql", "*.graphqls", "schema.graphqls"],
+      options: { parser: "graphql" },
     },
   ],
 };
