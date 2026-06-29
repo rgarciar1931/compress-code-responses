@@ -59,9 +59,23 @@ You pay fewer completion tokens; your repo still gets normally formatted code.
 
 ## Quick start
 
+Choose the branch that matches your use case:
+
 ```bash
+# For generic projects (JS, PHP, XML, GraphQL, etc.)
 git clone https://github.com/rgarciar1931/compress-code-responses.git
 cd compress-code-responses
+git checkout master
+npm install
+npm run install-skill
+npm run ensure-deps
+```
+
+```bash
+# For Adobe Commerce / Magento 2 projects
+git clone https://github.com/rgarciar1931/compress-code-responses.git
+cd compress-code-responses
+git checkout adobe-commerce
 npm install
 npm run install-skill
 npm run ensure-deps
