@@ -32,6 +32,20 @@ npm run install-skill
 npm run ensure-deps
 ```
 
+### Install from specific version tags
+
+```bash
+# Stable release (master)
+git clone https://github.com/rgarciar1931/compress-code-responses.git
+cd compress-code-responses
+git checkout v1.0.0
+
+# Adobe Commerce release
+git clone https://github.com/rgarciar1931/compress-code-responses.git
+cd compress-code-responses
+git checkout v1.0.0-adobe
+```
+
 On Windows PowerShell, if script execution policy blocks `npm`, use `npm.cmd`:
 
 ```powershell
@@ -42,7 +56,7 @@ npm.cmd run ensure-deps
 
 ### Adobe Commerce / Magento 2 users
 
-For Adobe Commerce-specific Prettier config (di.xml, module.xml, GraphQL schemas, etc.), install from the `adobe-commerce` branch:
+For Adobe Commerce-specific Prettier config (di.xml, module.xml, GraphQL schemas, etc.), install from the `adobe-commerce` branch or tag:
 
 ```bash
 git clone https://github.com/rgarciar1931/compress-code-responses.git
