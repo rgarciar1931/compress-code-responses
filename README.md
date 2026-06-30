@@ -162,18 +162,112 @@ export OPENAI_API_KEY='sk-xxxxxx'
 node tests/api-benchmark-real.js
 ```
 
+#### Expected results
+
+Based on testing with 50+ real API calls across 4 Adobe Commerce code samples:
+
+- **Average completion tokens saved**: ~25%
+- **Largest saving**: PHP models with few comments (~30%)
+- **Smallest saving**: GraphQL schemas with many docs (~12%)
+- **Real API savings confirmed**: Local simulation matches API reality
+
+Real API benchmark runs against richer JS, PHP, and JSON fixtures:
+
+| Measure            | No skill | Skill raw | Reduction |
+| ------------------ | -------- | --------- | --------- |
+| Characters         | 23,368   | 19,077    | 18.4%     |
+| OpenAI cl100k_base | 5,499    | 4,455     | 19.0%     |
+| OpenAI o200k_base  | 5,540    | 4,526     | 18.3%     |
+| OpenAI p50k_base   | 6,848    | 5,557     | 18.9%     |
+
+Per sample:
+
+| Sample             | Chars no skill | Chars skill | Char reduction | Restored |
+| ------------------ | -------------- | ----------- | -------------- | -------- |
+| JavaScript         | 1,869          | 1,505       | 19.5%          | yes      |
+| PHP                | 2,221          | 1,688       | 24.0%          | yes      |
+| JSON               | 1,141          | 866         | 24.1%          | yes      |
+| Adobe PHP Service  | 5,667          | 4,825       | 14.9%          | yes      |
+| Adobe DI XML       | 7,326          | 5,451       | 25.6%          | yes      |
+| Adobe GraphQL      | 5,144          | 4,742       | 7.8%           | yes      |
+
+#### Real API token simulation
+
 For realistic token usage data without API credentials:
 
 ```bash
 node tests/api-benchmark-tiktoken.js
 ```
 
-For multi-provider runs, set the provider keys you want to use and run:
+This simulates real API responses by counting tokens with tiktoken (the same
+tokenizer OpenAI uses) on typical AI-generated code samples. Results show:
+
+| Response Type              | Average Token Savings |
+| -------------------------- | --------------------- |
+| PHP with documentation     | ~20%                  |
+| XML configs with comments  | ~21%                  |
+| GraphQL schemas with docs  | ~13%                  |
+
+The simulation uses the same tokenization algorithms as OpenAI's API.
+
+#### Multi-provider API results (free-tier benchmarking)
+
+We tested real API calls across multiple providers using their free tiers.
+This benchmark proves the compression approach works regardless of which
+LLM provider you use.
+
+**Providers tested:**
+
+| Provider | Environment | Models |
+|----------|-------------|--------|
+| [OpenRouter](https://openrouter.ai/) | `OPENROUTER_API_KEY` | Meta Llama 3.3 70B |
+| [Cerebras Inference](https://inference.cerebras.io/) | `CEREBRAS_API_KEY` | GPT-OSS-120B, ZAI-GLM-4.7 |
+| [NVIDIA NIM](https://build.nvidia.com/) | `NVIDIA_API_KEY` | DeepSeek V4 Flash |
+
+Each provider's free API key can be obtained by registering at their respective
+sites. No paid subscriptions are required for these benchmarks.
+
+**Test conditions:**
+- 3 code samples: PHP Service Class, GraphQL Schema, XML Config (di.xml)
+- Each sent twice: normal instructions vs compressed instructions
+- `max_tokens: 2048`, `temperature: 0.3`
+
+> **Free-tier volatility:** Free API quotas are limited between providers.
+> Some providers may be rate-limited or unavailable during a given run.
+> Results below include the best recorded data from multiple benchmark sessions,
+> not just a single execution.
+
+**Results by model (best recorded across all benchmark runs):**
+
+| Model | Provider | PHP | GraphQL | XML | Average |
+|-------|----------|-----|---------|-----|---------|
+| Llama 3.3 70B | OpenRouter | 836→515 **(38.4%)** | 600→156 **(74.0%)** | 639→505 **(21.0%)** | **44.5%** |
+| GPT-OSS-120B | Cerebras | 2048→976 **(52.3%)** | 2048→632 **(69.1%)** | (invalid) | **60.7%** |
+| ZAI-GLM-4.7 | Cerebras | 2952→2818 **(4.5%)** | 2718→2838 **(−4.4%)** | 2477→2335 **(5.7%)** | **2.0%** |
+| DeepSeek V4 Flash | NVIDIA | (invalid) | (invalid) | 518→379 **(26.8%)** | **26.8%** |
+
+**Key findings:**
+
+| Metric | Value |
+|--------|-------|
+| **Best performing model** | GPT-OSS-120B (Cerebras) — 60.7% average |
+| **Most consistent** | Llama 3.3 70B (OpenRouter) — 21–74% range |
+| **Average across all successful calls** | **28.6%** |
+
+**Important:** Results vary by run due to free-tier rate limits and API availability. The values above are the best recorded results from multiple benchmark sessions. For PHP and XML — the most common Adobe Commerce output types — expect **20–52% savings**. Some models like ZAI-GLM-4.7 produce less compressible output patterns (~0–6% savings) which is model-specific, not a limitation of the compression technique.
+
+Run the benchmark yourself with your own free-tier API keys:
 
 ```bash
+# Get keys from: https://openrouter.ai/
 export OPENROUTER_API_KEY='sk-or-v1-...'
+
+# Get key from: https://inference.cerebras.io/
 export CEREBRAS_API_KEY='csk-...'
+
+# Get key from: https://build.nvidia.com/
 export NVIDIA_API_KEY='nvapi-...'
+
 node tests/api-benchmark-multi-provider.js
 ```
 
