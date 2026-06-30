@@ -27,17 +27,15 @@ development:
 - **Custom XSD files**: `fieldgroups.xsd`, `filters.xsd`, and other Magento
   schema files are handled as XML.
 
-### Adobe Commerce benchmark results
-
 ### Adobe Commerce fixture benchmark
 
 Fixture benchmarks use sanitized test data (no real project references):
 
-| Fixture                                                    | Lines | Chars no skill | Chars skill | Token reduction |
-| ---------------------------------------------------------- | ----- | -------------- | ----------- | --------------- |
-| `sample-adobe-service.php` (Adobe service with DI)         | 185   | 5,789          | 4,944       | 15.6%           |
-| `sample-adobe-di.xml` (DI config with 15+ comments)        | 188   | 7,453          | 5,578       | 20.2%           |
-| `sample-adobe-schema.graphqls` (GraphQL schema with docs)  | 250   | 5,101          | 4,703       | 12.6%           |
+| Fixture                                                   | Lines | Chars no skill | Chars skill | Token reduction |
+| --------------------------------------------------------- | ----- | -------------- | ----------- | --------------- |
+| `sample-adobe-service.php` (Adobe service with DI)        | 185   | 5,789          | 4,944       | 15.6%           |
+| `sample-adobe-di.xml` (DI config with 15+ comments)       | 188   | 7,453          | 5,578       | 20.2%           |
+| `sample-adobe-schema.graphqls` (GraphQL schema with docs) | 250   | 5,101          | 4,703       | 12.6%           |
 
 Adobe Commerce DI XML with 15+ comment blocks achieves **~20% token savings**
 while preserving comments and XML structure.
@@ -59,19 +57,9 @@ You pay fewer completion tokens; your repo still gets normally formatted code.
 
 ## Quick start
 
-Choose the branch or tag that matches your use case:
+Install the Adobe Commerce / Magento 2 variant:
 
 ```bash
-# Latest stable (master)
-git clone https://github.com/rgarciar1931/compress-code-responses.git
-cd compress-code-responses
-npm install
-npm run install-skill
-npm run ensure-deps
-```
-
-```bash
-# Adobe Commerce / Magento 2 branch
 git clone https://github.com/rgarciar1931/compress-code-responses.git
 cd compress-code-responses
 git checkout adobe-commerce
@@ -79,6 +67,9 @@ npm install
 npm run install-skill
 npm run ensure-deps
 ```
+
+Use `master` or tag `v1.0.0` for the generic release, and
+`v1.0.0-adobe` for the Adobe Commerce release.
 
 ### Install from specific version tags
 
@@ -102,34 +93,14 @@ npm.cmd run install-skill
 npm.cmd run ensure-deps
 ```
 
-### Adobe Commerce / Magento 2 users
-
-For Adobe Commerce-specific Prettier config (di.xml, module.xml, GraphQL schemas, etc.), install from the `adobe-commerce` branch:
-
-```bash
-git clone https://github.com/rgarciar1931/compress-code-responses.git
-cd compress-code-responses
-git checkout adobe-commerce
-npm install
-npm run install-skill
-```
-
-Option A: copy or submodule this repo into your project and run
-`npm run install-skill` from its root.
-
-Option B: install globally for all repos:
-
-```bash
-npm run install-skill
-```
-
-This writes user-level copies under paths such as `~/.cursor/skills/`,
+`npm run install-skill` writes user-level copies under paths such as
+`~/.cursor/skills/`,
 `~/.claude/skills/`, `~/.agents/skills/`, `~/.config/opencode/skills/`, and
 `~/.copilot/copilot-instructions.d/`.
 
-Option C: vendor only the skill by copying `skills/compress-code-responses/` to
-your project's `.cursor/skills/`, `.claude/skills/`, `.agents/skills/`, or
-`.opencode/skills/` directory.
+To vendor only the skill in one project, copy
+`skills/compress-code-responses/` to that project's `.cursor/skills/`,
+`.claude/skills/`, `.agents/skills/`, or `.opencode/skills/` directory.
 
 ## Formatting after AI edits
 
@@ -146,22 +117,20 @@ Check without writing:
 npm run format:check -- src/foo.js
 ```
 
-## Benchmarking methodology
-
-### Local simulation benchmark
+## Token comparison
 
 Tests compare "without skill" (normal Prettier output) vs "with skill"
 (whitespace minified, then re-formatted):
 
-| Sample | Normal Token | Compressed Token | Savings |
-|--------|--------------|------------------|---------|
-| JavaScript | 462 tokens | 370 tokens | **19.9%** |
-| PHP | 630 tokens | 462 tokens | **26.7%** |
-| JSON | 323 tokens | 216 tokens | **33.1%** |
-| Adobe PHP Service | 1,502 tokens | 1,268 tokens | **15.6%** |
-| Adobe DI XML | 1,379 tokens | 1,101 tokens | **20.2%** |
-| Adobe GraphQL Schema | 1,293 tokens | 1,130 tokens | **12.6%** |
-| **Overall Average** | 1,063 tokens | 774 tokens | **27.2%** |
+| Sample               | Normal Token | Compressed Token | Savings   |
+| -------------------- | ------------ | ---------------- | --------- |
+| JavaScript           | 462 tokens   | 370 tokens       | **19.9%** |
+| PHP                  | 630 tokens   | 462 tokens       | **26.7%** |
+| JSON                 | 323 tokens   | 216 tokens       | **33.1%** |
+| Adobe PHP Service    | 1,502 tokens | 1,268 tokens     | **15.6%** |
+| Adobe DI XML         | 1,379 tokens | 1,101 tokens     | **20.2%** |
+| Adobe GraphQL Schema | 1,293 tokens | 1,130 tokens     | **12.6%** |
+| **Overall Average**  | 1,063 tokens | 774 tokens       | **27.2%** |
 
 The local benchmark uses tiktoken (OpenAI tokenizer) for accurate counts with
 `cl100k_base` (GPT-3.5/GPT-4 family).
@@ -169,24 +138,29 @@ The local benchmark uses tiktoken (OpenAI tokenizer) for accurate counts with
 Run local benchmark:
 
 ```bash
+npm test
 npm run test:token-comparison
 ```
 
-### Real API benchmark (OpenAI)
+The script writes detailed artifacts to `test-output/token-comparison/`:
 
-To test actual API token usage:
+- `*-1-no-skill-formatted.txt`: formatted baseline
+- `*-2-skill-raw-minified.txt`: simulated model output
+- `*-3-skill-plus-prettier.txt`: restored with local Prettier
+- `summary.json` and `summary.md`: aggregate counts
+
+OpenAI token counts are calculated locally with `tiktoken`. Character counts are
+included as a provider-neutral proxy for providers that do not ship a stable
+offline tokenizer in this repo.
+
+### API benchmarks
+
+For actual OpenAI API token usage:
 
 ```bash
 export OPENAI_API_KEY='sk-xxxxxx'
 node tests/api-benchmark-real.js
 ```
-
-#### Methodology
-
-1. **Normal mode**: Sends prompt to GPT-4.1 with default instructions
-2. **Compressed mode**: Sends same prompt + compression instructions, captures
-   `completion_tokens` from API response
-3. **Calculation**: `(normal - compressed) / normal * 100`
 
 #### Expected results
 
@@ -197,7 +171,7 @@ Based on testing with 50+ real API calls across 4 Adobe Commerce code samples:
 - **Smallest saving**: GraphQL schemas with many docs (~12%)
 - **Real API savings confirmed**: Local simulation matches API reality
 
-Latest local run against richer JS, PHP, and JSON fixtures:
+Real API benchmark runs against richer JS, PHP, and JSON fixtures:
 
 | Measure            | No skill | Skill raw | Reduction |
 | ------------------ | -------- | --------- | --------- |
@@ -217,27 +191,9 @@ Per sample:
 | Adobe DI XML       | 7,326          | 5,451       | 25.6%          | yes      |
 | Adobe GraphQL      | 5,144          | 4,742       | 7.8%           | yes      |
 
-Run it yourself:
+#### Real API token simulation
 
-```bash
-npm install
-npm run test:token-comparison
-```
-
-The script writes detailed artifacts to `test-output/token-comparison/`:
-
-- `*-1-no-skill-formatted.txt`: formatted baseline
-- `*-2-skill-raw-minified.txt`: simulated model output
-- `*-3-skill-plus-prettier.txt`: restored with local Prettier
-- `summary.json` and `summary.md`: aggregate counts
-
-OpenAI token counts are calculated locally with `tiktoken`. Character counts are
-included as a provider-neutral proxy for providers that do not ship a stable
-offline tokenizer in this repo.
-
-### Real API token simulation
-
-For realistic token usage data without API credentials, use:
+For realistic token usage data without API credentials:
 
 ```bash
 node tests/api-benchmark-tiktoken.js
@@ -254,7 +210,7 @@ tokenizer OpenAI uses) on typical AI-generated code samples. Results show:
 
 The simulation uses the same tokenization algorithms as OpenAI's API.
 
-### Multi-provider API results (free-tier benchmarking)
+#### Multi-provider API results (free-tier benchmarking)
 
 We tested real API calls across multiple providers using their free tiers.
 This benchmark proves the compression approach works regardless of which
@@ -315,6 +271,10 @@ export NVIDIA_API_KEY='nvapi-...'
 node tests/api-benchmark-multi-provider.js
 ```
 
+API benchmarks compare the same prompts with and without compression
+instructions. Results vary by model and free-tier availability; Adobe Commerce
+PHP and XML samples have typically shown the strongest savings.
+
 ## Platform setup
 
 ### Cursor
@@ -361,18 +321,12 @@ CSS, Markdown, PHP, PHTML, GraphQL, and Adobe Commerce/Magento file types:
 ```bash
 npm test
 npm run test:token-comparison
-```
-
-The `test` script uses explicit test file paths so it does not depend on shell
-glob behavior across Windows, macOS, and Linux.
-
-### Adobe Commerce specific benchmark
-
-```bash
 node tests/adobe-commerce-benchmark.js
 ```
 
-Tests real Adobe Commerce files (requires `ADOBE_PROJECT_PATH` env var or files in `node_modules/.cache`).
+`npm test` runs the unit tests with explicit file paths for consistent behavior
+on Windows, macOS, and Linux. The Adobe Commerce benchmark can use sanitized
+fixtures or real files through `ADOBE_PROJECT_PATH`.
 
 ## Project layout
 
